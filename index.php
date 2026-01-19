@@ -1,4 +1,26 @@
 <?php
+session_start();
+
+// 1. Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../secure_pass/login.php");
+    exit();
+}
+
+// 2. Connect to the NEW unified database
+$conn = new mysqli("localhost", "root", "", "secure_db");
+?>
+
+<?php
+
+// If not logged in, kick them out to the login page
+if (!isset($_SESSION['user_id'])) {
+    // Note: You may need to adjust this path depending on where your login file is
+    header("Location: ../secure_pass/login.php"); 
+    exit();
+}
+?>
+<?php
 $conn = new mysqli("localhost", "root", "", "grading_db");
 
 // Check if a search query exists
@@ -12,6 +34,18 @@ if (!empty($search)) {
 }
 
 $students = $conn->query($query);
+?>
+
+<?php
+
+// Redirect to login if the session doesn't exist
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../secure_pass/login.php");
+    exit();
+}
+
+// Connect to the new unified database
+$conn = new mysqli("localhost", "root", "", "secure_db");
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +63,22 @@ $students = $conn->query($query);
     </style>
 </head>
 <body>
+    <div style="background: #1a1d2b; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a855f7; margin-bottom: 30px;">
+    <div style="color: white; font-weight: bold; font-size: 1.2rem;">
+        🎓 GradePoint <span style="color: #a855f7;">Pro</span>
+    </div>
+    
+    <div style="color: #888; display: flex; align-items: center; gap: 20px;">
+        <span>Logged in as: <strong style="color: #fff;"><?php echo $_SESSION['username']; ?></strong> 
+              (<span style="color: #a855f7;"><?php echo ucfirst($_SESSION['role']); ?></span>)
+        </span>
+        
+        <a href="../secure_pass/logout.php" 
+           style="background: #ff4d4d; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; font-weight: bold;">
+           Logout
+        </a>
+    </div>
+</div>
 
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -66,9 +116,18 @@ $students = $conn->query($query);
                 <td><?php echo $row['full_name']; ?></td>
                 <td><?php echo $row['class']; ?></td>
                 <td>
-                    <a href="input_marks.php?id=<?php echo $row['id']; ?>" class="btn btn-view">Add Scores</a>
-                    <a href="view_report.php?id=<?php echo $row['id']; ?>" class="btn" style="background:#28a745;">Report Card</a>
-                </td>
+    <a href="input_marks.php?id=<?php echo $row['id']; ?>" class="btn btn-view">Add Scores</a>
+    <a href="view_report.php?id=<?php echo $row['id']; ?>" class="btn" style="background:#28a745;">Report Card</a>
+    
+    <?php if ($_SESSION['role'] == 'admin'): ?>
+        <a href="delete_student.php?id=<?php echo $row['id']; ?>" 
+           class="btn" 
+           style="background:#dc3545;" 
+           onclick="return confirm('Are you sure you want to delete this student?')">
+           Delete
+        </a>
+    <?php endif; ?>
+</td>
             </tr>
             <?php endwhile; ?>
         </tbody>

@@ -1,5 +1,19 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "grading_db");
+session_start();
+
+// 1. Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../secure_pass/login.php");
+    exit();
+}
+
+// 2. Connect to the NEW unified database
+$conn = new mysqli("localhost", "root", "", "secure_db");
+?>
+
+
+<?php
+$conn = new mysqli("localhost", "root", "", "secure_db");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['full_name'];
@@ -17,6 +31,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
+<?php
+session_start();
+
+// Redirect to login if the session doesn't exist
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../secure_pass/login.php");
+    exit();
+}
+
+// Connect to the new unified database
+$conn = new mysqli("localhost", "root", "", "secure_db");
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,6 +58,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 <body>
+    <div style="background: #1a1d2b; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #a855f7; margin-bottom: 30px;">
+    <div style="color: white; font-weight: bold; font-size: 1.2rem;">
+        🎓 GradePoint <span style="color: #a855f7;">Pro</span>
+    </div>
+    
+    <div style="color: #888; display: flex; align-items: center; gap: 20px;">
+        <span>Logged in as: <strong style="color: #fff;"><?php echo $_SESSION['username']; ?></strong> 
+              (<span style="color: #a855f7;"><?php echo ucfirst($_SESSION['role']); ?></span>)
+        </span>
+        
+        <a href="../secure_pass/logout.php" 
+           style="background: #ff4d4d; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; font-weight: bold;">
+           Logout
+        </a>
+    </div>
+</div>
 
 <div class="form-card">
     <h2>Add New Student</h2>

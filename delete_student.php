@@ -17,8 +17,6 @@ header("Location: index.php");
 exit();
 
 <?php
-session_start();
-
 // Redirect to login if the session doesn't exist
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../secure_pass/login.php");
